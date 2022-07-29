@@ -1,0 +1,55 @@
+version: "3.0"
+services:
+  doc_ai_authen_db:
+    image: mdillon/postgis
+    container_name: doc_ai_authen_db
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=moso-doc-ai-authen
+    ports:
+      - 5433:5432
+    volumes:
+      - ./docker-data/postgres_authen:/var/lib/postgresql/data
+
+  doc_ai_authen:
+    build:
+      context: ./auth
+      dockerfile: ./Dockerfile
+    container_name: doc_ai_authen
+    depends_on:
+      - doc_ai_authen_db
+      - cache
+    restart: always
+    ports:
+      - 5001:9999
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=moso-doc-ai-authen
+      - POSTGRES_PORT=5432
+      - POSTGRES_HOST=doc_ai_authen_db
+      - SECRET_KEY=moso_doc_ai_auth
+      - TOKEN_EXPIRE_TIME=60
+      - CACHE_PASSWORD=eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
+      - CACHE_PORT=6379
+      - CACHE_HOST=cache
+      - PORT=9999
+      - CRUD_TOKEN=kwVNaSNXvWKwVDUxl3ODvpIHLxWGZ9SaP649TLuc0UEVZNaEMALCTS1Dwh2xyO5X
+
+  cache:
+    container_name: cache
+    image: redis:6.2-alpine
+    restart: always
+    ports:
+      - 6379:6379
+    command: redis-server --save 20 1 --loglevel warning --requirepass eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
+    volumes: 
+      - cache:/data
+
+volumes:
+  cache:
+    driver: local
+
+
