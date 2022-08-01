@@ -1,25 +1,12 @@
 version: "3.0"
 services:
-  doc_ai_authen_db:
-    image: mdillon/postgis
-    container_name: doc_ai_authen_db
-    restart: always
-    environment:
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_DB=moso-doc-ai-authen
-    ports:
-      - 5433:5432
-    volumes:
-      - ./docker-data/postgres_authen:/var/lib/postgresql/data
-
-  doc_ai_authen:
+  authentication:
     build:
       context: ./auth
       dockerfile: ./Dockerfile
-    container_name: doc_ai_authen
+    container_name: authentication
     depends_on:
-      - doc_ai_authen_db
+      - authentication_db
       - cache
     restart: always
     ports:
@@ -27,16 +14,29 @@ services:
     environment:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_USER=postgres
-      - POSTGRES_DB=moso-doc-ai-authen
+      - POSTGRES_DB=authentication
       - POSTGRES_PORT=5432
-      - POSTGRES_HOST=doc_ai_authen_db
-      - SECRET_KEY=moso_doc_ai_auth
+      - POSTGRES_HOST=authentication_db
+      - SECRET_KEY=moso_auth
       - TOKEN_EXPIRE_TIME=60
       - CACHE_PASSWORD=eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
       - CACHE_PORT=6379
       - CACHE_HOST=cache
       - PORT=9999
       - CRUD_TOKEN=kwVNaSNXvWKwVDUxl3ODvpIHLxWGZ9SaP649TLuc0UEVZNaEMALCTS1Dwh2xyO5X
+
+  authentication_db:
+    image: mdillon/postgis
+    container_name: authentication_db
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=authentication
+    ports:
+      - 5433:5432
+    volumes:
+      - ./docker-data/postgres_authentication:/var/lib/postgresql/data
 
   cache:
     container_name: cache
@@ -51,5 +51,3 @@ services:
 volumes:
   cache:
     driver: local
-
-

@@ -8,7 +8,6 @@ from datetime import datetime
 TOKEN_EXPIRE_TIME=os.getenv('TOKEN_EXPIRE_TIME')
 SECRET_KEY=os.getenv('SECRET_KEY')
 
-
 def is_trusted(headers, apiKeys):
     for apiKey in apiKeys:
         raw_header, header_value, timestamp = get_item(headers, apiKey.key)
